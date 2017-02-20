@@ -1,16 +1,32 @@
 group 'core.informatik.haw-hamburg.de'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.4.RELEASE")
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'idea'
 apply plugin: 'maven'
-mainClassName = 'App'
+apply plugin: 'org.springframework.boot'
+mainClassName = 'Application'
 
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+jar {
+    baseName = 'calendar-rest-service'
+    version =  '0.1.0'
 }
 
 dependencies {
@@ -20,4 +36,6 @@ dependencies {
     compile 'com.google.oauth-client:google-oauth-client-jetty:1.22.0'
     compile 'com.google.apis:google-api-services-calendar:v3-rev227-1.22.0'
 
+    compile("org.springframework.boot:spring-boot-starter-web")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }

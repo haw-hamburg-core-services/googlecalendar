@@ -1,3 +1,5 @@
+package de.haw_hamburg.informatik.core.calendar;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -10,7 +12,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.client.util.DateTime;
 
-import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.*;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 
 import java.io.IOException;
@@ -19,8 +22,8 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
-public class App {
-    /** Application name. */
+public class CalendarAccess {
+    /** hello.Application name. */
     private static final String APPLICATION_NAME =
             "CoRE google calendar access";
 
@@ -64,7 +67,7 @@ public class App {
     public static Credential authorize() throws IOException {
         // Load client secrets.
         InputStream in =
-                App.class.getResourceAsStream("/client_secret.json");
+                CalendarAccess.class.getResourceAsStream("/client_secret.json");
         GoogleClientSecrets clientSecrets =
                 GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
@@ -96,6 +99,26 @@ public class App {
                 .build();
     }
 
+    public static List<Event> getNextEvents() throws IOException {
+        // Build a new authorized API client service.
+        // Note: Do not confuse this class with the
+        //   com.google.api.services.calendar.model.Calendar class.
+        com.google.api.services.calendar.Calendar service =
+                getCalendarService();
+
+        // List the next 10 events from the primary calendar.
+        DateTime now = new DateTime(System.currentTimeMillis());
+        Events events = service.events().list("primary")
+                .setMaxResults(10)
+                .setTimeMin(now)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+        List<Event> items = events.getItems();
+
+        return items;
+    }
+
     public static void main(String[] args) throws IOException {
         // Build a new authorized API client service.
         // Note: Do not confuse this class with the
@@ -121,7 +144,8 @@ public class App {
                 if (start == null) {
                     start = event.getStart().getDate();
                 }
-                System.out.printf("%s (%s)\n", event.getSummary(), start);
+
+                System.out.printf("%s (%s) at %s\n", event.getSummary(), start, event.getLocation());
             }
         }
     }
